@@ -87,7 +87,23 @@ PeoplePlatform.prototype = {
               response.statusCode = 200;
               response.setHeader('Content-Type', 'application/json');
 
-              if(!theUrlParams.sensor || !theUrlParams.state) {
+	      if (theUrlParams.dhcp && theUrlParams.address &&
+		  (theUrlParams.cid || theUrlParams.hwaddr)) {
+		  for (let i = 0; i < this.peopleAccessories.length; i++) {
+		      if (theUrlParams.cid && this.peopleAccessories[i].cid === theUrlParams.cid ||
+			  theUrlParams.hwaddr && this.peopleAccessories[i].hwaddr === theUrlParams.hwaddr) {
+			  this.peopleAccessories[i].target = theUrlParams.address;
+			  theUrlParams.sensor = this.peopleAccessories[i].name;
+			  break;
+		      }
+		  }
+	      }
+
+	      if (theUrlParams.dhcp && !theUrlParams.sensor) {
+                response.write(JSON.stringify({success: true, ignored: true}));
+                response.end();
+	      }
+              else if(!theUrlParams.sensor || !theUrlParams.state) {
                 response.statusCode = 404;
                 response.setHeader("Content-Type", "text/plain");
                 var errorText = "WebHook error: No sensor or state specified in request.";
@@ -169,6 +185,8 @@ function PeopleAccessory(log, config, platform) {
     this.pingInterval = config['pingInterval'] || this.platform.pingInterval;
     this.ignoreReEnterExitSeconds = config['ignoreReEnterExitSeconds'] || this.platform.ignoreReEnterExitSeconds;
     this.stateCache = false;
+    this.cid = config['cid'];
+    this.hwaddr = config['hwaddr'];
 
     this.service = new Service.OccupancySensor(this.name);
     this.service
