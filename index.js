@@ -89,11 +89,12 @@ PeoplePlatform.prototype = {
 
 	      if (theUrlParams.dhcp && theUrlParams.address &&
 		  (theUrlParams.cid || theUrlParams.hwaddr)) {
-		  for (let i = 0; i < this.peopleAccessories.length; i++) {
-		      if (theUrlParams.cid && this.peopleAccessories[i].cid === theUrlParams.cid ||
-			  theUrlParams.hwaddr && this.peopleAccessories[i].hwaddr === theUrlParams.hwaddr) {
-			  this.peopleAccessories[i].target = theUrlParams.address;
-			  theUrlParams.sensor = this.peopleAccessories[i].name;
+		  for (let pa of this.peopleAccessories) {
+		      if ((theUrlParams.cid && pa.cid === theUrlParams.cid ||
+			   theUrlParams.hwaddr && pa.hwaddr === theUrlParams.hwaddr) &&
+			  pa.target !== theUrlParams.address) {
+			  pa.target = theUrlParams.address;
+			  theUrlParams.sensor = pa.name;
 			  break;
 		      }
 		  }
